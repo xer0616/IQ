@@ -45,11 +45,6 @@
             const resume = document.getElementById('resume').value;
             const loadFromLocal = document.getElementById('loadFromLocal').checked;
 
-            if (!apiToken || !jobDesc || !resume) {
-                alert('Please fill in all fields');
-                return;
-            }
-
             let data;
             if (loadFromLocal) {
                 // Load from local qa.json
@@ -64,6 +59,10 @@
                     return;
                 }
             } else {
+                if (!apiToken || !jobDesc || !resume) {
+                    alert('Please fill in all fields');
+                    return;
+                }
                 const payload = `Generate a json, question and answer key-value pair, to list out all possible interview questions based on the job description: ${jobDesc} and the corresponding answers refer to the experience of ${resume}`;
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiToken}`;
 
