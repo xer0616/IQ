@@ -45,7 +45,7 @@
             }
 
             const payload = `Generate a json, question and answer key-value pair, to list out all possible interview questions based on the job description: ${jobDesc} and the corresponding answers refer to the experience of ${resume}`;
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiToken}`;
             console.log(payload)
             // Step 1: Send the left box content to the Gemini API
             const response = await fetch(apiUrl, {
