@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Question Generator</title>
+</head>
+<body>
+    <h1>Interview Question Generator</h1>
+
+    <!-- API Token -->
+    <label for="apiToken">API Token:</label>
+    <input type="text" id="apiToken" placeholder="Enter your API token" required><br><br>
+
+    <!-- Job Description -->
+    <label for="jobDesc">Job Description:</label>
+    <textarea id="jobDesc" rows="5" cols="40" placeholder="Enter job description here" required></textarea><br><br>
+
+    <!-- Resume -->
+    <label for="resume">Resume:</label>
+    <textarea id="resume" rows="5" cols="40" placeholder="Enter your resume here" required></textarea><br><br>
+
+    <!-- Submit Button -->
+    <button onclick="generateQuestions()">Generate Interview Questions</button><br><br>
+
+    <!-- Dropdown List for Questions -->
+    <label for="questionList">Select a Question:</label>
+    <select id="questionList">
+        <option value="">Select a Question</option>
+    </select><br><br>
+
+    <!-- Answer Box -->
+    <label for="answerBox">Answer:</label>
+    <textarea id="answerBox" rows="5" cols="40" readonly></textarea><br><br>
+
+    <script>
+        async function generateQuestions() {
+            const apiToken = document.getElementById('apiToken').value;
+            const jobDesc = document.getElementById('jobDesc').value;
+            const resume = document.getElementById('resume').value;
+
+            if (!apiToken || !jobDesc || !resume) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const payload = {
+                job_description: jobDesc,
+                resume_content: resume
+            };
+
+            const response = await fetch('https://question-answer/com', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                alert('Error generating questions');
+                return;
+            }
+
+            const data = await response.json();
+
+            // Populate the dropdown with questions
+            const questionList = document.getElementById('questionList');
+            questionList.innerHTML = '<option value="">Select a Question</option>'; // Reset options
+
+            Object.keys(data).forEach(question => {
+                const option = document.createElement('option');
+                option.value = question;
+                option.textContent = question;
+                questionList.appendChild(option);
+            });
+        }
+
+        // Display answer when a question is selected
+        document.getElementById('questionList').addEventListener('change', function () {
+            const selectedQuestion = this.value;
+            const answerBox = document.getElementById('answerBox');
+
+            if (selectedQuestion) {
+                const answer = getAnswerFromResponse(selectedQuestion);
+                answerBox.value = answer || 'No answer available';
+            }
+        });
+
+        function getAnswerFromResponse(questionKey) {
+            // This function will get the answer based on the selected question key
+            const responseJson = {
+                // Sample response, replace this with actual data
+                "What is your experience with JavaScript?": "I have been using JavaScript for over 5 years, working on various front-end and back-end projects.",
+                "How do you manage a team?": "I lead teams through agile practices and ensure regular communication and feedback."
+            };
+
+            return responseJson[questionKey];
+        }
+    </script>
+</body>
+</html>
