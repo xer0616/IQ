@@ -20,6 +20,138 @@
     <label for="resume">Resume:</label>
     <textarea id="resume" rows="5" cols="40" placeholder="Enter your resume here" required></textarea><br><br>
 
+    <!-- Load Source Switch -->
+    <label for="loadFromLocal">
+        <input type="checkbox" id="loadFromLocal"> Load Questions from Local qa.json
+    </label><br><br>
+
+    <!-- Submit Button -->
+    <button onclick="generateQuestions()">Generate Interview Questions</button><br><br>
+
+    <!-- Dropdown List for Questions -->
+    <label for="questionList">Select a Question:</label>
+    <select id="questionList">
+        <option value="">Select a Question</option>
+    </select><br><br>
+
+    <!-- Answer Box -->
+    <label for="answerBox">Answer:</label>
+    <textarea id="answerBox" rows="5" cols="40" readonly></textarea><br><br>
+
+    <script>
+        async function generateQuestions() {
+            const apiToken = document.getElementById('apiToken').value;
+            const jobDesc = document.getElementById('jobDesc').value;
+            const resume = document.getElementById('resume').value;
+            const loadFromLocal = document.getElementById('loadFromLocal').checked;
+
+            if (!apiToken || !jobDesc || !resume) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            let data;
+            if (loadFromLocal) {
+                // Load from local qa.json
+                try {
+                    const response = await fetch('qa.json');
+                    if (!response.ok) {
+                        throw new Error('Error loading local QA file');
+                    }
+                    data = await response.json();
+                } catch (error) {
+                    alert('Failed to load local QA data: ' + error.message);
+                    return;
+                }
+            } else {
+                const payload = `Generate a json, question and answer key-value pair, to list out all possible interview questions based on the job description: ${jobDesc} and the corresponding answers refer to the experience of ${resume}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiToken}`;
+
+                try {
+                    console.log(payload)
+                    // Step 1: Send the left box content to the Gemini API
+                    const response = await fetch(apiUrl, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        contents: [{ parts: [{ text: payload }] }],
+                      }),
+                    });
+        
+                    if (!response.ok) {
+                        alert('Error generating questions');
+                        return;
+                    }
+        
+                    const data = await response.json();
+                    console.log(data)
+                } catch (error) {
+                    alert('Failed to fetch questions: ' + error.message);
+                    return;
+                }
+            }
+
+            // Populate the dropdown with questions
+            const questionList = document.getElementById('questionList');
+            questionList.innerHTML = '<option value="">Select a Question</option>'; // Reset options
+
+            Object.keys(data).forEach(question => {
+                const option = document.createElement('option');
+                option.value = question;
+                option.textContent = question;
+                questionList.appendChild(option);
+            });
+        }
+
+        // Display answer when a question is selected
+        document.getElementById('questionList').addEventListener('change', function () {
+            const selectedQuestion = this.value;
+            const answerBox = document.getElementById('answerBox');
+
+            if (selectedQuestion) {
+                const answer = getAnswerFromResponse(selectedQuestion);
+                answerBox.value = answer || 'No answer available';
+            }
+        });
+
+        function getAnswerFromResponse(questionKey) {
+            // This function will get the answer based on the selected question key
+            const responseJson = {
+                // Sample response, replace this with actual data
+                "What is your experience with JavaScript?": "I have been using JavaScript for over 5 years, working on various front-end and back-end projects.",
+                "How do you manage a team?": "I lead teams through agile practices and ensure regular communication and feedback."
+            };
+
+            return responseJson[questionKey];
+        }
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Question Generator</title>
+</head>
+<body>
+    <h1>Interview Question Generator</h1>
+
+    <!-- API Token -->
+    <label for="apiToken">API Token:</label>
+    <input type="text" id="apiToken" placeholder="Enter your API token" required><br><br>
+
+    <!-- Job Description -->
+    <label for="jobDesc">Job Description:</label>
+    <textarea id="jobDesc" rows="5" cols="40" placeholder="Enter job description here" required></textarea><br><br>
+
+    <!-- Resume -->
+    <label for="resume">Resume:</label>
+    <textarea id="resume" rows="5" cols="40" placeholder="Enter your resume here" required></textarea><br><br>
+
     <!-- Submit Button -->
     <button onclick="generateQuestions()">Generate Interview Questions</button><br><br>
 
