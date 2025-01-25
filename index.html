@@ -10,15 +10,15 @@
 
     <!-- API Token -->
     <label for="apiToken">API Token:</label>
-    <input type="text" id="apiToken" placeholder="Enter your API token" required><br><br>
+    <input type="text" id="apiToken" placeholder="Enter your API token"><br><br>
 
     <!-- Job Description -->
     <label for="jobDesc">Job Description:</label>
-    <textarea id="jobDesc" rows="5" cols="40" placeholder="Enter job description here" required></textarea><br><br>
+    <textarea id="jobDesc" rows="5" cols="40" placeholder="Enter job description here"></textarea><br><br>
 
     <!-- Resume -->
     <label for="resume">Resume:</label>
-    <textarea id="resume" rows="5" cols="40" placeholder="Enter your resume here" required></textarea><br><br>
+    <textarea id="resume" rows="5" cols="40" placeholder="Enter your resume here"></textarea><br><br>
 
     <!-- Load Source Switch -->
     <label for="loadFromLocal">
@@ -39,13 +39,16 @@
     <textarea id="answerBox" rows="5" cols="40" readonly></textarea><br><br>
 
     <script>
+        let qaData = {}; // Global variable to store the questions and answers
+
         async function generateQuestions() {
+            const loadFromLocal = document.getElementById('loadFromLocal').checked;
             const apiToken = document.getElementById('apiToken').value;
             const jobDesc = document.getElementById('jobDesc').value;
             const resume = document.getElementById('resume').value;
-            const loadFromLocal = document.getElementById('loadFromLocal').checked;
 
             let data;
+
             if (loadFromLocal) {
                 // Load from local qa.json
                 try {
@@ -86,17 +89,15 @@
         
                     const data = await response.json();
                     console.log(data)
-                } catch (error) {
-                    alert('Failed to fetch questions: ' + error.message);
-                    return;
-                }
             }
+
+            qaData = data; // Store the loaded data globally
 
             // Populate the dropdown with questions
             const questionList = document.getElementById('questionList');
             questionList.innerHTML = '<option value="">Select a Question</option>'; // Reset options
 
-            Object.keys(data).forEach(question => {
+            Object.keys(qaData).forEach(question => {
                 const option = document.createElement('option');
                 option.value = question;
                 option.textContent = question;
@@ -117,14 +118,9 @@
 
         function getAnswerFromResponse(questionKey) {
             // This function will get the answer based on the selected question key
-            const responseJson = {
-                // Sample response, replace this with actual data
-                "What is your experience with JavaScript?": "I have been using JavaScript for over 5 years, working on various front-end and back-end projects.",
-                "How do you manage a team?": "I lead teams through agile practices and ensure regular communication and feedback."
-            };
-
-            return responseJson[questionKey];
+            return qaData[questionKey] || 'No answer available';
         }
     </script>
 </body>
 </html>
+
